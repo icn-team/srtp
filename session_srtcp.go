@@ -127,6 +127,10 @@ func (s *SessionSRTCP) write(buf []byte) (int, error) {
 	return s.session.nextConn.Write(encrypted)
 }
 
+func (s *SessionSRTCP) writeInsecure(buf []byte) (int, error) {
+	return s.session.nextConn.Write(buf)
+}
+
 func (s *SessionSRTCP) setWriteDeadline(t time.Time) error {
 	return s.session.nextConn.SetWriteDeadline(t)
 }

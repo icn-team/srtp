@@ -145,9 +145,24 @@ func (w *WriteStreamSRTCP) WriteRTCP(header *rtcp.Header, payload []byte) (int, 
 	return w.session.write(append(headerRaw, payload...))
 }
 
+// WriteRTCP writes a RTCP header and its payload to the nextConn
+func (w *WriteStreamSRTCP) WriteInsecureRTCP(header *rtcp.Header, payload []byte) (int, error) {
+	headerRaw, err := header.Marshal()
+	if err != nil {
+		return 0, err
+	}
+
+	return w.session.writeInsecure(append(headerRaw, payload...))
+}
+
 // Write encrypts and writes a full RTCP packets to the nextConn
 func (w *WriteStreamSRTCP) Write(b []byte) (int, error) {
 	return w.session.write(b)
+}
+
+// Write writes a full RTCP packets to the nextConn
+func (w *WriteStreamSRTCP) WriteInsecure(b []byte) (int, error) {
+	return w.session.writeInsecure(b)
 }
 
 // SetWriteDeadline sets the deadline for the Write operation.

@@ -119,6 +119,10 @@ func (s *SessionSRTP) write(b []byte) (int, error) {
 	return s.writeRTP(&packet.Header, packet.Payload)
 }
 
+func (s *SessionSRTP) writeInsecure(b []byte) (int, error) {
+	return s.session.nextConn.Write(b)
+}
+
 // bufferpool is a global pool of buffers used for encrypted packets in
 // writeRTP below.  Since it's global, buffers can be shared between
 // different sessions, which amortizes the cost of allocating the pool.
@@ -154,6 +158,29 @@ func (s *SessionSRTP) writeRTP(header *rtp.Header, payload []byte) (int, error) 
 	}
 
 	return s.session.nextConn.Write(encrypted)
+}
+
+func (s *SessionSRTP) writeInsecureRTP(header *rtp.Header, payload []byte) (int, error) {
+	if _, ok := <-s.session.started; ok {
+		return 0, errStartedChannelUsedIncorrectly
+	}
+
+	ibuf := bufferpool.Get()
+	defer bufferpool.Put(ibuf)
+
+	buf := ibuf.([]byte)
+	buf = growBufferSize(buf, header.MarshalSize()+len(payload))
+
+	// Copy the header
+	n, err := header.MarshalTo(buf)
+	if err != nil {
+		return 0, err
+	}
+
+	// Copy the payload
+	copy(buf[n:], payload)
+
+	return s.session.nextConn.Write(buf)
 }
 
 func (s *SessionSRTP) setWriteDeadline(t time.Time) error {

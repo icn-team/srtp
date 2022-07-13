@@ -142,9 +142,19 @@ func (w *WriteStreamSRTP) WriteRTP(header *rtp.Header, payload []byte) (int, err
 	return w.session.writeRTP(header, payload)
 }
 
+// WriteInsecureRTP writes a RTP packet to the connection
+func (w *WriteStreamSRTP) WriteInsecureRTP(header *rtp.Header, payload []byte) (int, error) {
+	return w.session.writeInsecureRTP(header, payload)
+}
+
 // Write encrypts and writes a full RTP packets to the nextConn
 func (w *WriteStreamSRTP) Write(b []byte) (int, error) {
 	return w.session.write(b)
+}
+
+// WriteInsecure writes a full RTP packets to the nextConn
+func (w *WriteStreamSRTP) WriteInsecure(b []byte) (int, error) {
+	return w.session.writeInsecure(b)
 }
 
 // SetWriteDeadline sets the deadline for the Write operation.
