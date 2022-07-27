@@ -157,9 +157,9 @@ func (s *srtpCipherAeadAesGcm) decryptRTCP(dst, encrypted []byte, srtcpIndex, ss
 // https://tools.ietf.org/html/rfc7714#section-8.1
 func (s *srtpCipherAeadAesGcm) rtpInitializationVector(header *rtp.Header, roc uint32) [12]byte {
 	var iv [12]byte
-	binary.BigEndian.PutUint32(iv[2:], header.SSRC)
-	binary.BigEndian.PutUint32(iv[6:], roc)
-	binary.BigEndian.PutUint16(iv[10:], header.SequenceNumber)
+	// binary.BigEndian.PutUint32(iv[2:], header.SSRC)
+	// binary.BigEndian.PutUint32(iv[6:], roc)
+	// binary.BigEndian.PutUint16(iv[10:], header.SequenceNumber)
 
 	for i := range iv {
 		iv[i] ^= s.srtpSessionSalt[i]
@@ -177,8 +177,8 @@ func (s *srtpCipherAeadAesGcm) rtpInitializationVector(header *rtp.Header, roc u
 func (s *srtpCipherAeadAesGcm) rtcpInitializationVector(srtcpIndex uint32, ssrc uint32) [12]byte {
 	var iv [12]byte
 
-	binary.BigEndian.PutUint32(iv[2:], ssrc)
-	binary.BigEndian.PutUint32(iv[8:], srtcpIndex)
+	// binary.BigEndian.PutUint32(iv[2:], ssrc)
+	// binary.BigEndian.PutUint32(iv[8:], srtcpIndex)
 
 	for i := range iv {
 		iv[i] ^= s.srtcpSessionSalt[i]

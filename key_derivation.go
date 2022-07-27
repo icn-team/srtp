@@ -51,16 +51,16 @@ func aesCmKeyDerivation(label byte, masterKey, masterSalt []byte, indexOverKdr i
 func generateCounter(sequenceNumber uint16, rolloverCounter uint32, ssrc uint32, sessionSalt []byte) (counter [16]byte) {
 	copy(counter[:], sessionSalt)
 
-	counter[4] ^= byte(ssrc >> 24)
-	counter[5] ^= byte(ssrc >> 16)
-	counter[6] ^= byte(ssrc >> 8)
-	counter[7] ^= byte(ssrc)
-	counter[8] ^= byte(rolloverCounter >> 24)
-	counter[9] ^= byte(rolloverCounter >> 16)
-	counter[10] ^= byte(rolloverCounter >> 8)
-	counter[11] ^= byte(rolloverCounter)
-	counter[12] ^= byte(sequenceNumber >> 8)
-	counter[13] ^= byte(sequenceNumber)
+	// counter[4] ^= byte(ssrc >> 24)
+	// counter[5] ^= byte(ssrc >> 16)
+	// counter[6] ^= byte(ssrc >> 8)
+	// counter[7] ^= byte(ssrc)
+	// counter[8] ^= byte(rolloverCounter >> 24)
+	// counter[9] ^= byte(rolloverCounter >> 16)
+	// counter[10] ^= byte(rolloverCounter >> 8)
+	// counter[11] ^= byte(rolloverCounter)
+	// counter[12] ^= byte(sequenceNumber >> 8)
+	// counter[13] ^= byte(sequenceNumber)
 
 	return counter
 }

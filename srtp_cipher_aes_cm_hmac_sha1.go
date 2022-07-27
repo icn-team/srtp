@@ -198,13 +198,13 @@ func (s *srtpCipherAesCmHmacSha1) generateSrtpAuthTag(buf []byte, roc uint32) ([
 	}
 
 	// For SRTP only, we need to hash the rollover counter as well.
-	rocRaw := [4]byte{}
-	binary.BigEndian.PutUint32(rocRaw[:], roc)
-
-	_, err := s.srtpSessionAuth.Write(rocRaw[:])
-	if err != nil {
-		return nil, err
-	}
+	// rocRaw := [4]byte{}
+	// binary.BigEndian.PutUint32(rocRaw[:], roc)
+	//
+	// _, err := s.srtpSessionAuth.Write(rocRaw[:])
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// Truncate the hash to the size indicated by the profile
 	authTagLen, err := s.rtpAuthTagLen()
