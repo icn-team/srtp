@@ -160,7 +160,9 @@ func destinationSSRC(pkts []rtcp.Packet) []uint32 {
 }
 
 func (s *SessionSRTCP) decrypt(buf []byte) error {
+	s.remoteContextMutex.Lock()
 	decrypted, err := s.remoteContext.DecryptRTCP(buf, buf, nil)
+	s.remoteContextMutex.Unlock()
 	if err != nil {
 		return err
 	}
@@ -190,4 +192,12 @@ func (s *SessionSRTCP) decrypt(buf []byte) error {
 	}
 
 	return nil
+}
+
+func (s *SessionSRTCP) UpdateKeys(keys SessionKeys, profile ProtectionProfile) error {
+	return s.newContext(
+		keys.LocalMasterKey, keys.LocalMasterSalt,
+		keys.RemoteMasterKey, keys.RemoteMasterSalt,
+		profile,
+	)
 }

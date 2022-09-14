@@ -18,6 +18,7 @@ type streamSession interface {
 
 type session struct {
 	localContextMutex           sync.Mutex
+	remoteContextMutex          sync.Mutex
 	localContext, remoteContext *Context
 	localOptions, remoteOptions []ContextOption
 
@@ -108,13 +109,8 @@ func (s *session) close() error {
 
 func (s *session) start(localMasterKey, localMasterSalt, remoteMasterKey, remoteMasterSalt []byte, profile ProtectionProfile, child streamSession) error {
 	var err error
-	s.localContext, err = CreateContext(localMasterKey, localMasterSalt, profile, s.localOptions...)
-	if err != nil {
-		return err
-	}
 
-	s.remoteContext, err = CreateContext(remoteMasterKey, remoteMasterSalt, profile, s.remoteOptions...)
-	if err != nil {
+	if err = s.newContext(localMasterKey, localMasterSalt, remoteMasterKey, remoteMasterSalt, profile); err != nil {
 		return err
 	}
 
@@ -146,6 +142,26 @@ func (s *session) start(localMasterKey, localMasterSalt, remoteMasterKey, remote
 	}()
 
 	close(s.started)
+
+	return nil
+}
+
+func (s *session) newContext(localMasterKey, localMasterSalt, remoteMasterKey, remoteMasterSalt []byte, profile ProtectionProfile) error {
+	var err error
+
+	s.localContextMutex.Lock()
+	s.localContext, err = CreateContext(localMasterKey, localMasterSalt, profile, s.localOptions...)
+	s.localContextMutex.Unlock()
+	if err != nil {
+		return err
+	}
+
+	s.remoteContextMutex.Lock()
+	s.remoteContext, err = CreateContext(remoteMasterKey, remoteMasterSalt, profile, s.remoteOptions...)
+	s.remoteContextMutex.Unlock()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

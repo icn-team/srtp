@@ -221,7 +221,9 @@ func (s *SessionSRTP) decrypt(buf []byte) error {
 		return errFailedTypeAssertion
 	}
 
+	s.session.remoteContextMutex.Lock()
 	decrypted, err := s.remoteContext.decryptRTP(buf, buf, h, headerLen)
+	s.session.remoteContextMutex.Unlock()
 	if err != nil {
 		return err
 	}
@@ -232,4 +234,12 @@ func (s *SessionSRTP) decrypt(buf []byte) error {
 	}
 
 	return nil
+}
+
+func (s *SessionSRTP) UpdateKeys(keys SessionKeys, profile ProtectionProfile) error {
+	return s.newContext(
+		keys.LocalMasterKey, keys.LocalMasterSalt,
+		keys.RemoteMasterKey, keys.RemoteMasterSalt,
+		profile,
+	)
 }
