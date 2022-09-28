@@ -1,6 +1,7 @@
 package srtp
 
 const labelExtractorDtlsSrtp = "EXTRACTOR-dtls_srtp"
+const labelExtractorSharedSrtp = "EXTRACTOR-shared_srtp"
 
 // KeyingMaterialExporter allows package SRTP to extract keying material
 type KeyingMaterialExporter interface {
@@ -50,5 +51,32 @@ func (c *Config) ExtractSessionKeysFromDTLS(exporter KeyingMaterialExporter, isC
 	c.Keys.LocalMasterSalt = serverWriteKey[keyLen:]
 	c.Keys.RemoteMasterKey = clientWriteKey[0:keyLen]
 	c.Keys.RemoteMasterSalt = clientWriteKey[keyLen:]
+	return nil
+}
+
+func (c *Config) ExtractSessionKeysFromShared(exporter KeyingMaterialExporter) error {
+	keyLen, err := c.Profile.keyLen()
+	if err != nil {
+		return err
+	}
+
+	saltLen, err := c.Profile.saltLen()
+	if err != nil {
+		return err
+	}
+
+	keyingMaterial, err := exporter.ExportKeyingMaterial(labelExtractorSharedSrtp, nil, keyLen+saltLen)
+	if err != nil {
+		return err
+	}
+
+	key := append([]byte{}, keyingMaterial[0:keyLen]...)
+	salt := append([]byte{}, keyingMaterial[keyLen:keyLen+saltLen]...)
+
+	c.Keys.LocalMasterKey = key
+	c.Keys.LocalMasterSalt = salt
+	c.Keys.RemoteMasterKey = key
+	c.Keys.RemoteMasterSalt = salt
+
 	return nil
 }
