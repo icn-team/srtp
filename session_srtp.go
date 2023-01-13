@@ -221,9 +221,14 @@ func (s *SessionSRTP) decrypt(buf []byte) error {
 		return errFailedTypeAssertion
 	}
 
+	decrypted := buf
+
 	s.session.remoteContextMutex.Lock()
-	decrypted, err := s.remoteContext.decryptRTP(buf, buf, h, headerLen)
+	if s.session.remoteContext.SRTPDecrypt {
+		decrypted, err = s.remoteContext.decryptRTP(buf, buf, h, headerLen)
+	}
 	s.session.remoteContextMutex.Unlock()
+
 	if err != nil {
 		return err
 	}

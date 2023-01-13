@@ -53,6 +53,9 @@ type Context struct {
 
 	newSRTCPReplayDetector func() replaydetector.ReplayDetector
 	newSRTPReplayDetector  func() replaydetector.ReplayDetector
+
+	SRTPDecrypt  bool
+	SRTCPDecrypt bool
 }
 
 // CreateContext creates a new SRTP Context.
@@ -98,6 +101,8 @@ func CreateContext(masterKey, masterSalt []byte, profile ProtectionProfile, opts
 
 	for _, o := range append(
 		[]ContextOption{ // Default options
+			SRTPDecrypt(),
+			SRTCPDecrypt(),
 			SRTPNoReplayProtection(),
 			SRTCPNoReplayProtection(),
 		},
