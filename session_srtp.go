@@ -142,17 +142,7 @@ func (s *SessionSRTP) writeRTP(header *rtp.Header, payload []byte) (int, error) 
 		return 0, errStartedChannelUsedIncorrectly
 	}
 
-	// encryptRTP will either return our buffer, or, if it is too
-	// small, allocate a new buffer itself.  In either case, it is
-	// safe to put the buffer back into the pool, but only after
-	// nextConn.Write has returned.
-	ibuf := bufferpool.Get()
-	defer bufferpool.Put(ibuf)
-
-	s.session.localContextMutex.Lock()
-	encrypted, err := s.localContext.encryptRTP(ibuf.([]byte), header, payload)
-	s.session.localContextMutex.Unlock()
-
+	encrypted, err := s.encryptRTP(header, payload)
 	if err != nil {
 		return 0, err
 	}
@@ -181,6 +171,31 @@ func (s *SessionSRTP) writeInsecureRTP(header *rtp.Header, payload []byte) (int,
 	copy(buf[n:], payload)
 
 	return s.session.nextConn.Write(buf)
+}
+
+func (s *SessionSRTP) encrypt(b []byte) ([]byte, error) {
+	packet := &rtp.Packet{}
+
+	if err := packet.Unmarshal(b); err != nil {
+		return nil, err
+	}
+
+	return s.encryptRTP(&packet.Header, packet.Payload)
+}
+
+func (s *SessionSRTP) encryptRTP(header *rtp.Header, payload []byte) ([]byte, error) {
+	// encryptRTP will either return our buffer, or, if it is too
+	// small, allocate a new buffer itself.  In either case, it is
+	// safe to put the buffer back into the pool, but only after
+	// nextConn.Write has returned.
+	ibuf := bufferpool.Get()
+	defer bufferpool.Put(ibuf)
+
+	s.session.localContextMutex.Lock()
+	encrypted, err := s.localContext.encryptRTP(ibuf.([]byte), header, payload)
+	s.session.localContextMutex.Unlock()
+
+	return encrypted, err
 }
 
 func (s *SessionSRTP) setWriteDeadline(t time.Time) error {

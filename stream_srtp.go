@@ -157,6 +157,16 @@ func (w *WriteStreamSRTP) WriteInsecure(b []byte) (int, error) {
 	return w.session.writeInsecure(b)
 }
 
+// EncryptRTP encrypts a RTP packet
+func (w *WriteStreamSRTP) EncryptRTP(header *rtp.Header, payload []byte) ([]byte, error) {
+	return w.session.encryptRTP(header, payload)
+}
+
+// Encrypt encrypts a raw RTP packet
+func (w *WriteStreamSRTP) Encrypt(b []byte) ([]byte, error) {
+	return w.session.encrypt(b)
+}
+
 // SetWriteDeadline sets the deadline for the Write operation.
 // Setting to zero means no deadline.
 func (w *WriteStreamSRTP) SetWriteDeadline(t time.Time) error {

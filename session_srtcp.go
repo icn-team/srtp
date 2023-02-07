@@ -114,6 +114,19 @@ func (s *SessionSRTCP) write(buf []byte) (int, error) {
 		return 0, errStartedChannelUsedIncorrectly
 	}
 
+	encrypted, err := s.encrypt(buf)
+	if err != nil {
+		return 0, err
+	}
+
+	return s.session.nextConn.Write(encrypted)
+}
+
+func (s *SessionSRTCP) writeInsecure(buf []byte) (int, error) {
+	return s.session.nextConn.Write(buf)
+}
+
+func (s *SessionSRTCP) encrypt(buf []byte) ([]byte, error) {
 	ibuf := bufferpool.Get()
 	defer bufferpool.Put(ibuf)
 
@@ -121,14 +134,7 @@ func (s *SessionSRTCP) write(buf []byte) (int, error) {
 	encrypted, err := s.localContext.EncryptRTCP(ibuf.([]byte), buf, nil)
 	s.session.localContextMutex.Unlock()
 
-	if err != nil {
-		return 0, err
-	}
-	return s.session.nextConn.Write(encrypted)
-}
-
-func (s *SessionSRTCP) writeInsecure(buf []byte) (int, error) {
-	return s.session.nextConn.Write(buf)
+	return encrypted, err
 }
 
 func (s *SessionSRTCP) setWriteDeadline(t time.Time) error {

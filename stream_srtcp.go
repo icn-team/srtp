@@ -165,6 +165,21 @@ func (w *WriteStreamSRTCP) WriteInsecure(b []byte) (int, error) {
 	return w.session.writeInsecure(b)
 }
 
+// EncryptRTCP encrypts a RTCP packet
+func (w *WriteStreamSRTCP) EncryptRTCP(header *rtcp.Header, payload []byte) ([]byte, error) {
+	headerRaw, err := header.Marshal()
+	if err != nil {
+		return nil, err
+	}
+
+	return w.session.encrypt(append(headerRaw, payload...))
+}
+
+// Encrypt encrypts a raw RTCP packet
+func (w *WriteStreamSRTCP) Encrypt(b []byte) ([]byte, error) {
+	return w.session.encrypt(b)
+}
+
 // SetWriteDeadline sets the deadline for the Write operation.
 // Setting to zero means no deadline.
 func (w *WriteStreamSRTCP) SetWriteDeadline(t time.Time) error {
