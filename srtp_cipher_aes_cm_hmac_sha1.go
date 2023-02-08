@@ -85,16 +85,15 @@ func (s *srtpCipherAesCmHmacSha1) encryptRTP(dst []byte, header *rtp.Header, pay
 	if err = xorBytesCTR(s.srtpBlock, counter[:], dst[n:], payload); err != nil {
 		return nil, err
 	}
-	n += len(payload)
 
 	// Generate the auth tag.
-	authTag, err := s.generateSrtpAuthTag(dst[:n], roc)
+	authTag, err := s.generateSrtpAuthTag(dst[n:n+len(payload)], roc)
 	if err != nil {
 		return nil, err
 	}
 
 	// Write the auth tag to the dest.
-	copy(dst[n:], authTag)
+	copy(dst[n+len(payload):], authTag)
 
 	return dst, nil
 }
@@ -109,7 +108,7 @@ func (s *srtpCipherAesCmHmacSha1) decryptRTP(dst, ciphertext []byte, header *rtp
 	ciphertext = ciphertext[:len(ciphertext)-authTagLen]
 
 	// Generate the auth tag we expect to see from the ciphertext.
-	expectedTag, err := s.generateSrtpAuthTag(ciphertext, roc)
+	expectedTag, err := s.generateSrtpAuthTag(ciphertext[headerLen:], roc)
 	if err != nil {
 		return nil, err
 	}

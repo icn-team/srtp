@@ -76,7 +76,7 @@ func (s *srtpCipherAeadAesGcm) encryptRTP(dst []byte, header *rtp.Header, payloa
 	}
 
 	iv := s.rtpInitializationVector(header, roc)
-	s.srtpCipher.Seal(dst[n:n], iv[:], payload, dst[:n])
+	s.srtpCipher.Seal(dst[n:n], iv[:], payload, nil)
 	return dst, nil
 }
 
@@ -96,7 +96,7 @@ func (s *srtpCipherAeadAesGcm) decryptRTP(dst, ciphertext []byte, header *rtp.He
 	iv := s.rtpInitializationVector(header, roc)
 
 	if _, err := s.srtpCipher.Open(
-		dst[headerLen:headerLen], iv[:], ciphertext[headerLen:], ciphertext[:headerLen],
+		dst[headerLen:headerLen], iv[:], ciphertext[headerLen:], nil,
 	); err != nil {
 		return nil, err
 	}
