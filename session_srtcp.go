@@ -159,7 +159,7 @@ func destinationSSRC(pkts []rtcp.Packet) []uint32 {
 	return out
 }
 
-func (s *SessionSRTCP) decrypt(buf []byte) error {
+func (s *SessionSRTCP) Decrypt(buf []byte) error {
 	var err error
 	decrypted := buf
 

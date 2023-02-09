@@ -202,7 +202,7 @@ func (s *SessionSRTP) setWriteDeadline(t time.Time) error {
 	return s.session.nextConn.SetWriteDeadline(t)
 }
 
-func (s *SessionSRTP) decrypt(buf []byte) error {
+func (s *SessionSRTP) Decrypt(buf []byte) error {
 	h := &rtp.Header{}
 	headerLen, err := h.Unmarshal(buf)
 	if err != nil {

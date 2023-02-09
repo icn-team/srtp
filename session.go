@@ -12,8 +12,8 @@ import (
 
 type streamSession interface {
 	Close() error
+	Decrypt([]byte) error
 	write([]byte) (int, error)
-	decrypt([]byte) error
 }
 
 type session struct {
@@ -135,7 +135,7 @@ func (s *session) start(localMasterKey, localMasterSalt, remoteMasterKey, remote
 				return
 			}
 
-			if err = child.decrypt(b[:i]); err != nil {
+			if err = child.Decrypt(b[:i]); err != nil {
 				s.log.Info(err.Error())
 			}
 		}
